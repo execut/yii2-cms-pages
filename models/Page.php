@@ -84,6 +84,7 @@ class Page extends ActiveRecord
     {
         return [
             [['template_id'], 'required'],
+            [['position'], 'default', 'value' => 1],
             [['active', 'public', 'template_id', 'created_at', 'updated_at', 'slider_id', 'menu_id'], 'integer'],
             // Types
             [['type'], 'string'],
@@ -230,7 +231,7 @@ class Page extends ActiveRecord
             $url .= $language . '/';
         }
 
-        if ($this->alias) {
+        if ($this->alias && !$this->homepage) {
             $url .= $this->alias->url;
         }
 

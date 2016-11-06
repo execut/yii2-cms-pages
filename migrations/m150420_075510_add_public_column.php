@@ -5,12 +5,12 @@ use yii\db\Migration;
 
 class m150420_075510_add_public_column extends Migration
 {
-    public function up()
+    public function safeUp()
     {
-        $this->addColumn('{{%pages}}', 'public', Schema::TYPE_BOOLEAN.' UNSIGNED NOT NULL DEFAULT 1');
+        $this->addColumn('{{%pages}}', 'public', $this->boolean()->notNull()->defaultValue('true'));
     }
 
-    public function down()
+    public function safeDown()
     {
         $this->dropColumn('{{%pages}}', 'public');
     }

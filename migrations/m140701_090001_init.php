@@ -4,7 +4,7 @@ use yii\db\Schema;
 
 class m140701_090001_init extends \yii\db\Migration
 {
-    public function up()
+    public function safeUp()
     {
         $tableOptions = null;
         
@@ -12,29 +12,33 @@ class m140701_090001_init extends \yii\db\Migration
             $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
         }
 
+        if ($this->db->driverName === 'pgsql') {
+            $this->execute('CREATE TYPE pages_type AS ENUM (\'system\', \'user-defined\');');
+        }
+
         // Create 'pages' table
         $this->createTable('{{%pages}}', [
-            'id'            => Schema::TYPE_PK,
-            'type'          => "ENUM('system','user-defined') NOT NULL DEFAULT 'user-defined'",
-            'template_id'   => Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
-            'homepage'      => 'TINYINT(3) UNSIGNED NOT NULL DEFAULT \'0\'',
-            'active'        => 'TINYINT(3) UNSIGNED NOT NULL DEFAULT \'1\'',
-            'position'      => Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
-            'created_at'    => Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
-            'updated_at'    => Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
+            'id'            => $this->primaryKey(),
+            'type'          => "pages_type NOT NULL DEFAULT 'user-defined'",
+            'template_id'   => $this->integer()->unsigned()->notNull(),
+            'homepage'      => $this->integer(3)->unsigned()->notNull()->defaultValue('0'),
+            'active'        => $this->integer(3)->unsigned()->notNull()->defaultValue('1'),
+            'position'      => $this->integer()->unsigned()->notNull(),
+            'created_at'    => $this->integer()->unsigned()->notNull(),
+            'updated_at'    => $this->integer()->unsigned()->notNull(),
         ], $tableOptions);
         
         $this->createIndex('template_id', '{{%pages}}', 'template_id');
         
         // Create 'pages_lang' table
         $this->createTable('{{%pages_lang}}', [
-            'page_id'       => Schema::TYPE_INTEGER . ' NOT NULL',
-            'language'      => Schema::TYPE_STRING . '(10) NOT NULL',
-            'name'          => Schema::TYPE_STRING . '(255) NOT NULL',
-            'title'         => Schema::TYPE_STRING . '(255) NOT NULL',
-            'content'       => Schema::TYPE_TEXT . ' NOT NULL',
-            'created_at'    => Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
-            'updated_at'    => Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
+            'page_id'       => $this->integer()->notNull(),
+            'language'      => $this->string(10)->notNull(),
+            'name'          => $this->string()->notNull(),
+            'title'         => $this->string()->notNull(),
+            'content'       => $this->text()->notNull(),
+            'created_at'    => $this->integer()->unsigned()->notNull(),
+            'updated_at'    => $this->integer()->unsigned()->notNull(),
         ], $tableOptions);
         
         $this->addPrimaryKey('page_id_language', '{{%pages_lang}}', ['page_id', 'language']);
@@ -43,12 +47,12 @@ class m140701_090001_init extends \yii\db\Migration
         
         // Create 'page_templates' table
         $this->createTable('{{%page_templates}}', [
-            'id'                    => Schema::TYPE_PK,
-            'name'                  => Schema::TYPE_STRING . "(255) NOT NULL",
-            'layout_model'          => Schema::TYPE_STRING . "(255) NOT NULL",
-            'active'                => 'TINYINT(3) UNSIGNED NOT NULL DEFAULT \'1\'',
-            'created_at'            => Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
-            'updated_at'            => Schema::TYPE_INTEGER . ' UNSIGNED NOT NULL',
+            'id'                    => $this->primaryKey(),
+            'name'                  => $this->string()->notNull(),
+            'layout_model'          => $this->string()->notNull(),
+            'active'                => $this->integer(3)->unsigned()->notNull()->defaultValue('1'),
+            'created_at'            => $this->integer()->unsigned()->notNull(),
+            'updated_at'            => $this->integer()->unsigned()->notNull(),
         ], $tableOptions);
         
         // Insert the default template
@@ -60,7 +64,7 @@ class m140701_090001_init extends \yii\db\Migration
         ]);
     }
 
-    public function down()
+    public function safeDown()
     {
         $this->dropTable('page_templates');
         $this->dropTable('pages_lang');
